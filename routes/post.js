@@ -12,7 +12,7 @@ const {
   insertComment
 } = require("../data/db");
 
-const loadPost = require('../middleware/loadPost')
+const loadPost = require("../middleware/loadPost");
 
 router
   .route("/")
@@ -49,37 +49,82 @@ router
     }
   });
 /**
- * loadPost takes care of the 
+ * loadPost takes care of the
  * find post by id
  *  send error if post not found
  * save to req.postData
  * move to next middleware
- * 
+ *
  * Will send an error if it could not perform task above as a 500 error
  */
-router.all('/:id', loadPost)
+router.all("/:id*", loadPost);
 router
   .route("/:id")
-  .get(async ({postData: post}, res) => {
+  .get(async ({ postData: post }, res) => {
     /* GET posts/id */
-    res
-      .status(201)
-      .json(post);
-      return
+    res.status(201).json(post);
+    return;
   })
-  .delete(async ({postData: post}, res) => {
+  .delete(async ({ postData: post }, res) => {
     /* DELETE posts/id */
+    try {
+      await remove(post.id);
+      res.status(201).json(post);
+    } catch (e) {
+      res.status(500).json({
+        error: "The post could not be removed"
+      });
+    }
   })
-  .put(async ({postData: post}, res) => {
+  .put(async ({ postData: post, body: { title, contents } }, res) => {
     /* UPDATE posts/id */
+
+    /** should turn this into a middleware
+     * since it's used 2x -- copy/pasted from above
+     * */
+    if (!title || !contents) {
+      res.status(400).json({
+        errorMessage: "Please provide title and contents for the post."
+      });
+      return;
+    }
+
+    try {
+      const postFromBody = { ...post, title, contents };
+      await update(post.id, postFromBody);
+      try {
+        const modifiedPost = await findById(post.id);
+        res.status(201).json(modifiedPost);
+        return;
+      } catch (e) {
+        res.status(500).json({
+          error:
+            "Something went wrong with the server in terms of locating the requested post"
+        });
+      }
+    } catch (e) {
+      res.status(500).json({
+        error: "The post information could not be modified."
+      });
+    }
   });
 
 router
   .route("/:id/comments")
-  .get(async (req, res) => {
+  .get(async ({ postData: post }, res) => {
     /* GET posts/:id/comments */
+
+    try {
+      // get comments with matching post id
+      const comments = await findPostComments(post.id);
+      res.status(201).json(comments);
+    } catch (e) {
+      res.status(500).json({
+        error: "The comments information could not be retrieved."
+      });
+    }
   })
-  .post(async ({postData: post, body: { text } }, res) => {
+  .post(async ({ postData: post, body: { text } }, res) => {
     /* POST posts/:id/comments */
 
     if (!text) {
