@@ -2,7 +2,7 @@ const { Router } = require("express");
 const router = Router();
 
 router
-  .use("/")
+  .route("/")
   .get(async (req, res) => {
     /* GET posts */
     try {
@@ -19,19 +19,19 @@ router
   });
 
 router
-  .use("/:id")
+  .route("/:id")
   .get(async ({ params: { id } }, res) => {
     /* GET posts/id */
   })
   .delete(async ({ params: { id } }, res) => {
     /* DELETE posts/id */
   })
-  .update(async ({ params: { id } }, res) => {
+  .put(async ({ params: { id } }, res) => {
     /* UPDATE posts/id */
   });
 
 router
-  .use("/:id/comments")
+  .route("/:id/comments")
   .get(async (req, res) => {
     /* GET posts/:id/comments */
   })
