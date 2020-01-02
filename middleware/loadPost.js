@@ -5,7 +5,7 @@ const loadPost = async (req, res, next) => {
   if (id) {
     try {
       const post = await findById(id);
-      if (!post) {
+      if (!post.length) {
         res
           .status(404)
           .json({
@@ -13,7 +13,7 @@ const loadPost = async (req, res, next) => {
         });
         return;
       }
-      req.postData = post;
+      req.postData = post[0];
     } catch (e) {
       res.status(500).json({
         error:
