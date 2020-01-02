@@ -14,7 +14,7 @@ const {
 
 router
   .route("/")
-  .get(async (req, res) => {
+  .get(async (_, res) => {
     /* GET posts */
     try {
       const posts = await find();
