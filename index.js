@@ -7,7 +7,7 @@ const port = process.env.PORT || 3000
 app.use(express.json())
 app.use(express.urlencoded({extended: true}));
 
-app.use('/posts', postRouter)
+app.use('/api/posts', postRouter)
 
 
 app.listen(port, () => {
